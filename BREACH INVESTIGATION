@@ -1,0 +1,58 @@
+Weekly Breach Investigation
+Breach: ShinyHunters — Oracle PeopleSoft Zero‑Day Exploitation
+Analyst: Jamal Mahmoad
+Date: 2026-06-12
+
+1. Executive Summary
+The ShinyHunters extortion crew exploited a zero‑day flaw (CVE‑2026‑35273) in Oracle PeopleSoft Enterprise PeopleTools to gain remote code execution, steal sensitive data, and extort victims.
+The bug (CVSS 9.8) required no login or user interaction, exposing servers with the Environment Management Hub (PSEMHUB) accessible over HTTP.
+Universities were hit hardest, with hundreds of thousands of student and alumni records leaked.
+
+2. Attack Timeline
+
+May 27 – June 9, 2026: Active exploitation by ShinyHunters (UNC6240).
+June 10, 2026: Oracle publishes advisory after zero‑day window closes.
+Exploitation Path:
+Vulnerable PeopleSoft endpoints exposed.
+Attackers deploy custom MeshCentral agents disguised as Azure binaries.
+Lateral movement via SSH spraying with hardcoded credentials.
+Marker file dropped: README-IF-YOU-SEE-THIS-YOUVE-BEEN-HACKED.TXT.
+Data compressed with zstd and exfiltrated via SSH to ShinyHunters leak servers.
+
+3. MITRE ATT&CK Mapping
+
+Execution: Exploitation for Remote Services (T1190)
+Persistence: Web Shell / JSP Injection (T1505)
+Privilege Escalation: Abuse of Valid Accounts (T1078)
+Defense Evasion: Masquerading (T1036), Obfuscated Files (T1027)
+Credential Access: Credential Dumping via SSH spraying (T1110)
+Lateral Movement: Remote Services over SSH (T1021.004)
+Exfiltration: Exfiltration Over SSH (T1048)
+Impact: Data Exposure / Extortion
+
+4. Detection Opportunities
+
+Log Sources:
+WebLogic access logs for POST requests to /PSEMHUB/hub or /PSIGW/HttpListeningConnector.
+File system changes under PSEMHUB.war (unexpected .jsp files, odd folders).
+Recently modified .xml files in envmetadata/data/environment.
+Outbound SMB traffic on port 445 from PeopleSoft hosts.
+Detection Rules:
+Alert on mismatches between DNS resolution and actual endpoints.
+Flag unauthorized MeshCentral agents or suspicious binaries.
+Monitor for zstd compression followed by outbound SSH connections.
+
+5. Recommended Mitigations
+
+Disable or remove PSEMHUB service/application.
+Block external access to /PSEMHUB/* and /PSIGW/HttpListeningConnector.
+Apply Oracle’s patch once available in My Oracle Support.
+Hunt for persistence via .jsp web shells and modified .xml files.
+Restrict outbound SMB and SSH traffic from PeopleSoft servers.
+
+Analyst Notes
+
+This breach highlights the danger of ERP zero‑days in data‑rich environments like universities.
+ShinyHunters moved beyond SaaS token theft and vishing into server‑side exploitation, showing a strategic escalation.
+The campaign exposed over 455,000 student and alumni records (including sensitive personal data), confirming the severity of the attack.
+Whether this is a one‑off borrowed exploit or the start of ShinyHunters targeting ERP systems remains an open question
